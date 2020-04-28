@@ -1,8 +1,8 @@
-package server.src.network
+package server.network
 
 import communication.Message
-import server.src.network.communication.local.LocalNetworkController
-import server.src.devices.PeerDevice
+import server.network.communication.local.LocalNetworkController
+import server.devices.PeerDevice
 
 class NetworkController(getServerSupport: () -> serverSupport?) {
 

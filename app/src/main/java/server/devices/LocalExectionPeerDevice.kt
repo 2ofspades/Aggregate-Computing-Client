@@ -1,14 +1,13 @@
-package server.src.devices
+package server.devices
 
 import adapters.Adapter
 import communication.Message
 import communication.MessageType
 import devices.interfaces.EmulatedDevice
 import server.Execution
-import server.src.network.communication.NetworkCommunication
-import server.src.network.serverSupport
+import server.network.communication.NetworkCommunication
+import server.network.serverSupport
 import java.io.Serializable
-import java.util.*
 
 class LocalExecutionPeerDevice(
     id: Int,

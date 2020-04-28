@@ -1,10 +1,10 @@
-package server.src.network
+package server.network
 
 import communication.Message
 import communication.MessageType
 import devices.interfaces.Device
 import server.SUPPORT_ID
-import server.src.devices.PeerDevice
+import server.devices.PeerDevice
 import java.lang.NullPointerException
 import java.util.*
 

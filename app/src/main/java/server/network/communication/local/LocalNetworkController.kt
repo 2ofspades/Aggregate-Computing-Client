@@ -1,9 +1,10 @@
-package server.src.network.communication.local
+package server.network.communication.local
 
 import communication.Message
 import communication.MessageType
-import server.src.devices.PeerDevice
-import server.src.network.serverSupport
+import server.devices.PeerDevice
+import server.network.CommunicationControllerInterface
+import server.network.serverSupport
 import java.io.ObjectInputStream
 import java.io.ObjectOutputStream
 import java.lang.Exception
@@ -15,12 +16,16 @@ import kotlin.concurrent.thread
 const val SERVER_PORT = 2002
 val LOOPBACK_ADDRESS: InetAddress = InetAddress.getLoopbackAddress()
 
-class LocalNetworkController(val server: PeerDevice? = serverSupport) {
+class LocalNetworkController(val server: PeerDevice? = serverSupport) :
+    CommunicationControllerInterface {
 
 
     // connect to lookup server socket, instance the serverPeer, subscribe to server
     // and call the server Ready, this is called by the client
-    fun getRemoteServer(onServerReady: (PeerDevice) -> Unit, onMessage: (Message) -> Unit) {
+    override fun getRemoteServer(
+        onServerReady: (PeerDevice) -> Unit,
+        onMessage: (Message) -> Unit
+    ) {
         val serverPeer = PeerDevice(null, -1, "server")
         val localCommunication = LocalClientCommunication(
             serverPeer, InetSocketAddress(
@@ -40,6 +45,10 @@ class LocalNetworkController(val server: PeerDevice? = serverSupport) {
             // cant connect to server, try again or abort
         }
 
+    }
+
+    override fun offerService() {
+        TODO("Not yet implemented")
     }
 
     // When the network found a neighbour server to send a Join and wait for message

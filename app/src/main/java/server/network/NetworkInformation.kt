@@ -1,6 +1,6 @@
-package server.src.network
+package server.network
 
-import server.src.devices.PeerDevice
+import server.devices.PeerDevice
 import java.io.Serializable
 
 interface NetworkInformation : Serializable {

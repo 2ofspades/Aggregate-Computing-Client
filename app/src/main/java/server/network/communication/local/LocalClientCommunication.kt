@@ -1,9 +1,9 @@
-package server.src.network.communication.local
+package server.network.communication.local
 
 import communication.Message
-import server.src.network.communication.NetworkCommunication
-import server.src.devices.PeerDevice
-import server.src.network.serverSupport
+import server.network.communication.NetworkCommunication
+import server.devices.PeerDevice
+import server.network.serverSupport
 import java.io.ObjectInputStream
 import java.io.ObjectOutputStream
 import java.lang.Exception

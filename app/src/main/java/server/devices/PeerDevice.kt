@@ -1,10 +1,10 @@
-package server.src.devices
+package server.devices
 
 import communication.Message
 import communication.MessageType
 import devices.interfaces.AbstractDevice
-import server.src.network.communication.NetworkCommunication
-import server.src.network.serverSupport
+import server.network.communication.NetworkCommunication
+import server.network.serverSupport
 import java.util.*
 
 

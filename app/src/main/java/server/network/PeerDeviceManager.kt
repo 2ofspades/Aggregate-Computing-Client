@@ -1,4 +1,4 @@
-package server.src.network
+package server.network
 
 import devices.interfaces.Device
 import java.util.*

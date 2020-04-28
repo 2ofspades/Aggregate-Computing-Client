@@ -1,7 +1,7 @@
-package server.src.network.communication
+package server.network.communication
 
 import communication.Communication
-import server.src.devices.PeerDevice
+import server.devices.PeerDevice
 import java.net.Socket
 
 abstract class NetworkCommunication(override val device: PeerDevice) : Communication<Socket> {

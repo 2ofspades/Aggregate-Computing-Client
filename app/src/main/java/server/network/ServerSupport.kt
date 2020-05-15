@@ -8,7 +8,7 @@ import server.devices.PeerDevice
 import java.lang.NullPointerException
 import java.util.*
 
-object serverSupport : PeerDevice(UUID.randomUUID(), SUPPORT_ID, "serverSupport") {
+object ServerSupport : PeerDevice(UUID.randomUUID(), SUPPORT_ID, "serverSupport") {
 
     val deviceManager = PeerDeviceManager()
 
@@ -94,6 +94,15 @@ object serverSupport : PeerDevice(UUID.randomUUID(), SUPPORT_ID, "serverSupport"
 
     fun reset() {
         deviceManager.reset()
+    }
+
+    fun startServer() {
+        networkDevice?.startServer()
+    }
+
+    fun stopServer() {
+        networkDevice?.stopServer()
+        networkDevice = null
     }
 
 }

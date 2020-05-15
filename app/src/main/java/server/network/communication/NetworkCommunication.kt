@@ -11,9 +11,9 @@ abstract class NetworkCommunication(override val device: PeerDevice) : Communica
 
     fun addCommunication(networkCommunication: NetworkCommunication) {
         if (nextCommunication == null) {
-            nextCommunication = networkCommunication
+            this.nextCommunication = networkCommunication
         } else {
-            nextCommunication!!.addCommunication(networkCommunication)
+            this.nextCommunication!!.addCommunication(networkCommunication)
         }
     }
 

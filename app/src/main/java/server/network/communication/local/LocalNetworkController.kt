@@ -4,7 +4,7 @@ import communication.Message
 import communication.MessageType
 import server.devices.PeerDevice
 import server.network.CommunicationControllerInterface
-import server.network.serverSupport
+import server.network.ServerSupport
 import java.io.ObjectInputStream
 import java.io.ObjectOutputStream
 import java.lang.Exception
@@ -13,13 +13,12 @@ import java.net.InetSocketAddress
 import java.net.Socket
 import kotlin.concurrent.thread
 
-const val SERVER_PORT = 2002
-val SERVER_ADDRESS: InetAddress = InetAddress.getLoopbackAddress()
+
 
 class LocalNetworkController(
-    val server: PeerDevice? = serverSupport,
-    val serverAddress: InetAddress = SERVER_ADDRESS,
-    val serverPort: Int = SERVER_PORT
+    val server: PeerDevice? = ServerSupport,
+    private val serverAddress: InetAddress,
+    private val serverPort: Int
 ) :
     CommunicationControllerInterface {
 
@@ -36,7 +35,7 @@ class LocalNetworkController(
                 serverAddress, serverPort
             )
         )
-        serverPeer.networkDevice = localCommunication
+        serverPeer.setPhysicalDevice(localCommunication)
         try {
             localCommunication.connect(onReceive = {
                 while (it.isConnected) {
@@ -52,28 +51,45 @@ class LocalNetworkController(
 
     }
 
-    override fun offerService() {
+    override fun startOfferServer() {
+        //need to implement a protocol for discovering server in the local network, when found the
+        //address calls serverFoundAt(address)
         TODO("Not yet implemented")
+    }
+
+    override fun stopOfferServer() {
+        // stop the protocol above
+        TODO("Not yet implemented")
+    }
+
+    override fun setCommunicationForServer(server: PeerDevice) {
+        server.setPhysicalDevice(
+            LocalServerCommunication(
+                server,
+                InetSocketAddress(serverAddress, serverPort)
+            )
+        )
     }
 
     // When the network found a neighbour server to send a Join and wait for message
     // the support doesn't add the peer
-    fun offerServiceToNeighbourServer(address: InetAddress, port: Int) {
-        thread {
-            try {
-                val connection = Socket(address, port)
-                val joinSendMessage = Message(-1, MessageType.Join, serverSupport.uuid)
-                val outputStream = ObjectOutputStream(connection.getOutputStream())
-                outputStream.writeObject(joinSendMessage)
-                val objectInput = ObjectInputStream(connection.getInputStream())
-                while (connection.isConnected) {
-                    val receiveMessage = objectInput.readObject() as Message
-                    server!!.tell(receiveMessage)
+    fun serverFoundAt(address: InetAddress, port: Int) {
+        if (server != null) {
+            thread {
+                try {
+                    val connection = Socket(address, port)
+                    val joinSendMessage = Message(-1, MessageType.Join, ServerSupport.uuid)
+                    val outputStream = ObjectOutputStream(connection.getOutputStream())
+                    outputStream.writeObject(joinSendMessage)
+                    val objectInput = ObjectInputStream(connection.getInputStream())
+                    while (connection.isConnected) {
+                        val receiveMessage = objectInput.readObject() as Message
+                        server.tell(receiveMessage)
+                    }
+                } catch (e: Exception) {
+                    e.printStackTrace()
                 }
-            } catch (e: Exception) {
-                e.printStackTrace()
             }
-
         }
     }
 

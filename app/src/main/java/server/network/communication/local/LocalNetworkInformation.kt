@@ -3,7 +3,6 @@ package server.network.communication.local
 import communication.Message
 import server.devices.PeerDevice
 import server.network.NetworkInformation
-import server.network.serverSupport
 import java.io.ObjectInputStream
 import java.io.ObjectOutputStream
 import java.io.Serializable
@@ -17,8 +16,7 @@ class LocalNetworkInformation(
     private val message: Message
 ) : NetworkInformation {
 
-    //only for testing
-    var server: PeerDevice = serverSupport
+    lateinit var server: PeerDevice
 
     override fun isClient(): Boolean {
         return fromClient
@@ -29,9 +27,8 @@ class LocalNetworkInformation(
     }
 
     override fun setPhysicalDevice(peer: PeerDevice) {
-        val physicalLocalCommunication = LocalClientCommunication(peer, this)
-        physicalLocalCommunication.server = this.server
-        //val physicalLocalCommunication = LocalCommunication(peer, InetSocketAddress(address, port))
-        peer.setPhysicalDevice(physicalLocalCommunication)
+        val localCommunication = LocalClientCommunication(peer, this)
+        localCommunication.server = this.server
+        peer.setPhysicalDevice(localCommunication)
     }
 }

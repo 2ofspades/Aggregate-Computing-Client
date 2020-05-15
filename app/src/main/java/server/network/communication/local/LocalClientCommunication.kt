@@ -3,7 +3,6 @@ package server.network.communication.local
 import communication.Message
 import server.network.communication.NetworkCommunication
 import server.devices.PeerDevice
-import server.network.serverSupport
 import java.io.ObjectInputStream
 import java.io.ObjectOutputStream
 import java.lang.Exception
@@ -17,14 +16,13 @@ class LocalClientCommunication(device: PeerDevice, private val address: InetSock
     NetworkCommunication(device) {
 
     private lateinit var connection: Socket
-    lateinit var inputStream: ObjectInputStream
-    lateinit var outputStream: ObjectOutputStream
+    private lateinit var inputStream: ObjectInputStream
+    private lateinit var outputStream: ObjectOutputStream
     private var isClient = false
     private val semaphoreObjectStream: Semaphore = Semaphore(0)
     private val executors = Executors.newFixedThreadPool(3)
 
-    //only for testting
-    var server: PeerDevice = serverSupport
+    lateinit var server: PeerDevice
 
     // is called by the Network Information (the socket is already open)
     constructor(device: PeerDevice, localNetworkInformation: LocalNetworkInformation) :

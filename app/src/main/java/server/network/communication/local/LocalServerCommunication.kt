@@ -20,10 +20,6 @@ class LocalServerCommunication(
     private val address: InetSocketAddress
 ) : NetworkCommunication(device) {
 
-    init {
-        device.setPhysicalDevice(this)
-    }
-
     lateinit var serverSocket: ServerSocket
 
     override fun connect(onReceive: (Socket) -> Unit) {

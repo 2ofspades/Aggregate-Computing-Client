@@ -6,7 +6,7 @@ import communication.MessageType
 import devices.interfaces.EmulatedDevice
 import server.Execution
 import server.network.communication.NetworkCommunication
-import server.network.serverSupport
+import server.network.ServerSupport
 import java.io.Serializable
 
 class LocalExecutionPeerDevice(
@@ -37,9 +37,9 @@ class LocalExecutionPeerDevice(
     }
 
     private fun goFullWeight() {
-        serverSupport.replaceHosted(
+        ServerSupport.replaceHosted(
             this, PeerDevice(
-                serverSupport.uuid, id, name, networkDevice
+                ServerSupport.uuid, id, name, networkDevice
             )
         )
     }

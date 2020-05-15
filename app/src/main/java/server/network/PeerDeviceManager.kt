@@ -7,10 +7,10 @@ class PeerDeviceManager {
 
     private val hostedDevices: MutableList<Device> = mutableListOf()
     private val remoteDevices: MutableList<Device> = mutableListOf()
-    private var intId = 0
+    private var intId = 11
 
     private fun supportUUID(): UUID {
-        return serverSupport.uuid!!
+        return ServerSupport.uuid!!
     }
 
     private fun generateIntID(): Int {

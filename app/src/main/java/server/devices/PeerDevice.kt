@@ -4,7 +4,7 @@ import communication.Message
 import communication.MessageType
 import devices.interfaces.AbstractDevice
 import server.network.communication.NetworkCommunication
-import server.network.serverSupport
+import server.network.ServerSupport
 import java.util.*
 
 
@@ -12,11 +12,14 @@ open class PeerDevice(
     val uuid: UUID?,
     id: Int,
     name: String = "",
-    var networkDevice: NetworkCommunication? = null
+    protected var networkDevice: NetworkCommunication? = null
 ) : AbstractDevice(id, name, ::println) {
 
     fun setPhysicalDevice(networkCommunication: NetworkCommunication) {
-        networkDevice = networkCommunication
+        if (networkDevice != null)
+            networkDevice!!.addCommunication(networkCommunication)
+        else
+            networkDevice = networkCommunication
     }
 
     override fun execute() {
@@ -39,7 +42,7 @@ open class PeerDevice(
     }
 
     private fun goLightWeight() {
-        serverSupport.replaceHosted(
+        ServerSupport.replaceHosted(
             this, LocalExecutionPeerDevice(
                 id, name
             )

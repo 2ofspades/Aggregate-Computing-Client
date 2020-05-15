@@ -10,7 +10,6 @@ import java.lang.Exception
 import java.net.InetSocketAddress
 import java.net.ServerSocket
 import java.net.Socket
-import java.net.SocketException
 import java.util.*
 import kotlin.concurrent.thread
 
@@ -20,7 +19,7 @@ class LocalServerCommunication(
     private val address: InetSocketAddress
 ) : NetworkCommunication(device) {
 
-    lateinit var serverSocket: ServerSocket
+    private lateinit var serverSocket: ServerSocket
 
     override fun connect(onReceive: (Socket) -> Unit) {
         throw Exception("Server")
@@ -65,18 +64,15 @@ class LocalServerCommunication(
     override fun startServer(onReceive: (Socket) -> Unit) {
         serverSocket = ServerSocket(address.port, 5, address.address)
         thread {
-            while (!serverSocket.isClosed) {
-                try {
+            try {
+                while (!serverSocket.isClosed) {
                     val clientSocket = serverSocket.accept()
                     thread {
                         onReceive(clientSocket)
                     }
-                } catch (e: SocketException) {
-                    // do nothing
-                } catch (e: Exception) {
-                    e.printStackTrace()
                 }
-
+            } catch (exc: Exception) {
+                exc.printStackTrace()
             }
         }
     }

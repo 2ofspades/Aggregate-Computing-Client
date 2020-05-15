@@ -16,7 +16,7 @@ class LocalExecutionPeerDevice(
 ) :
     EmulatedDevice(id, name, adapterBuilder, onResult = ::println) {
 
-    var networkDevice: NetworkCommunication? = null
+    private var networkDevice: NetworkCommunication? = null
 
     fun setPhysicalDevice(networkCommunication: NetworkCommunication) {
         networkDevice = networkCommunication

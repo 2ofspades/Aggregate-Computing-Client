@@ -14,9 +14,13 @@ import java.net.Socket
 import kotlin.concurrent.thread
 
 const val SERVER_PORT = 2002
-val LOOPBACK_ADDRESS: InetAddress = InetAddress.getLoopbackAddress()
+val SERVER_ADDRESS: InetAddress = InetAddress.getLoopbackAddress()
 
-class LocalNetworkController(val server: PeerDevice? = serverSupport) :
+class LocalNetworkController(
+    val server: PeerDevice? = serverSupport,
+    val serverAddress: InetAddress = SERVER_ADDRESS,
+    val serverPort: Int = SERVER_PORT
+) :
     CommunicationControllerInterface {
 
 
@@ -29,7 +33,7 @@ class LocalNetworkController(val server: PeerDevice? = serverSupport) :
         val serverPeer = PeerDevice(null, -1, "server")
         val localCommunication = LocalClientCommunication(
             serverPeer, InetSocketAddress(
-                LOOPBACK_ADDRESS, SERVER_PORT
+                serverAddress, serverPort
             )
         )
         serverPeer.networkDevice = localCommunication
@@ -43,6 +47,7 @@ class LocalNetworkController(val server: PeerDevice? = serverSupport) :
             onServerReady(serverPeer)
         } catch (error: Exception) {
             // cant connect to server, try again or abort
+            error.printStackTrace()
         }
 
     }

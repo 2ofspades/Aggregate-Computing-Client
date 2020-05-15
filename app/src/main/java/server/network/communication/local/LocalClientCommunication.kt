@@ -9,6 +9,8 @@ import java.io.ObjectOutputStream
 import java.lang.Exception
 import java.net.InetSocketAddress
 import java.net.Socket
+import java.util.concurrent.Executors
+import java.util.concurrent.Semaphore
 import kotlin.concurrent.thread
 
 class LocalClientCommunication(device: PeerDevice, private val address: InetSocketAddress) :
@@ -18,6 +20,8 @@ class LocalClientCommunication(device: PeerDevice, private val address: InetSock
     lateinit var inputStream: ObjectInputStream
     lateinit var outputStream: ObjectOutputStream
     private var isClient = false
+    private val semaphoreObjectStream: Semaphore = Semaphore(0)
+    private val executors = Executors.newFixedThreadPool(3)
 
     //only for testting
     var server: PeerDevice = serverSupport
@@ -34,13 +38,17 @@ class LocalClientCommunication(device: PeerDevice, private val address: InetSock
         this.connection = localNetworkInformation.socket
         this.inputStream = localNetworkInformation.inputStream
         this.outputStream = localNetworkInformation.outputStream
+        semaphoreObjectStream.release()
         this.isClient = localNetworkInformation.isClient()
         thread {
             while (connection.isConnected) {
-                val message = extractMessage(connection)
-                server.tell(message)
+                try {
+                    val message = extractMessage(connection)
+                    server.tell(message)
+                } catch (exc: Exception) {
+                    exc.printStackTrace()
+                }
             }
-
         }
     }
 
@@ -48,6 +56,7 @@ class LocalClientCommunication(device: PeerDevice, private val address: InetSock
         connection = Socket(address.address, address.port)
         thread {
             outputStream = ObjectOutputStream(connection.getOutputStream())
+            semaphoreObjectStream.release()
             inputStream = ObjectInputStream(connection.getInputStream()) // can be blocking
             onReceive(connection)
         }
@@ -62,16 +71,15 @@ class LocalClientCommunication(device: PeerDevice, private val address: InetSock
     }
 
     override fun send(message: Message) {
-        thread {
+        executors.submit {
             try {
-                synchronized(outputStream) {
-                    outputStream.writeObject(message)
-                    outputStream.flush()
-                }
+                semaphoreObjectStream.acquire()
+                outputStream.writeObject(message)
+                //outputStream.flush()
+                semaphoreObjectStream.release()
             } catch (exc: Exception) {
                 exc.printStackTrace()
             }
-
         }
     }
 

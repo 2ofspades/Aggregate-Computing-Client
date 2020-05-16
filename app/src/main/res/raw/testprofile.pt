@@ -1,0 +1,50 @@
+
+import protelis:state:time
+
+def findDistance(listDevice){
+  if(listDevice.size() > 0){
+    let idList = listDevice.get(0);
+    let dist = distanceTo(idList)
+    [[idList, dist]].union(findDistance(listDevice.subTupleEnd(1)));
+  }else{
+    []
+  }
+}
+
+// return the minimun Distance from the device to the source
+// NEED to add POISON REVERSE otherwise can never converge when a link go down
+def distanceTo(idDestination) {
+  rep (d <- [1000, -1]) {
+    mux(idDestination == self.getID()) { [0, self.getID()]}
+    else {
+        let min = minHood(nbr(d))
+        [min.get(0)+1, min.get(1)]
+    }
+  }
+}
+
+let myId = self.getID();
+let myProfile = self.getMyProfile();
+// Get List of device that i can send message to
+let idOnlineList = [];
+let profiles = [];
+
+let distanceList = [];
+
+// update the list of device that are online and the distance to it
+rep (nbrDevice <- [myId]){
+	idOnlineList = unionHood PlusSelf(nbr(nbrDevice));
+	idOnlineList = idOnlineList.sort()
+}
+
+rep (nbrProfile <- [[myId, myProfile]]) {
+    profiles = unionHood PlusSelf(nbr(nbrProfile));
+    profiles = profiles.sort()
+}
+//self.userOnline(idOnlineList);
+
+self.getProfiles(profiles);
+
+//distanceList = findDistance(idOnlineList);
+self.checkDistance(distanceList);
+true;

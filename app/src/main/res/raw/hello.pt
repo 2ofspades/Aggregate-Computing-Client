@@ -3,26 +3,62 @@
 module hello
 
 import protelis:state:time
+import java.lang.Class.forName
+
+def distanceTo(source) {
+  rep (d <- 1000) {
+    mux(source) { 0 }
+    else { minHood(nbr(d)) + 1}
+  }
+}
+
+def testRic(tup) {
+    if(tup.size() > 0) {
+        self.announce(tup.get(0).toString());
+        testRic(tup.subTupleEnd(1));
+    } else {
+        false;
+    }
+}
 
 // Get a variable from the environment
 let leader = env.has("leader");
+let luc = env.has("luc");
+self.announce("distance to Leader: " + distanceTo(leader).toString());
+self.announce("distance to Luc: " + distanceTo(luc).toString());
+let tup = [1,2,3];
+//testRic(tup);
+
+rep(testN <- 4.0) {
+    tup = tup.union([testN]);
+    testN +1.0;
+}
+//testRic(tup);
+
+rep(exd <- []) {
+    testRic(exd);
+    exd.union(tup);
+}
 
 if(leader) {
 	self.announce("The leader is at "+self.getDeviceUID().getUID());
-	self.announce("The leader's count is: "+countDownWithDecay(4,1));
+	// self.announce("The leader's count is: "+countDownWithDecay(4,1));
 	true;
 } else {
-	// Otherwise, stay silent
-	false;
+    true;
 };
 
-// Check if any neighbor is the leader
-if (anyHood(nbr(leader))) {
-	// if so, speak!
-	self.announce("Hello from the leader to its neighbor at "+self.getDeviceUID().getUID());
-	true;
-} else {
-	// Otherwise, stay silent
-	// self.announce("No one is leader here");
-	false;
-};
+rep(foundLeader <- leader) {
+        if(anyHood(nbr(foundLeader)) || leader) {
+                if(leader) {true;}
+                else {
+                    self.announce("Hello from the leader to its neighbor at "+self.getDeviceUID().getUID());
+                    true;
+                }
+        	} else {
+        	    self.announce("No one is leader here");
+        	    false;
+        	}
+    }
+
+

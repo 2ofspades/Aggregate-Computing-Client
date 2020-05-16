@@ -1,0 +1,152 @@
+def getDistanceByID(distanceList, id){
+    if(distanceList.size() > 0) {
+        let tuple = distanceList.get(0);
+        let idList = tuple.get(0);
+        if (idList == id) {
+            tuple.get(1).get(0)
+        } else {
+            getDistanceByID(distanceList.subTupleEnd(1), id)
+        }
+    } else {
+        // Infinity
+        1000
+    }
+}
+
+
+// return true if the id message is already present
+// list is [[message, distance], ...]
+def hasIDMessage(listOfMessage, id){
+  if(listOfMessage.size() > 0){
+    let messageId = listOfMessage.get(0).get(1);
+    messageId == id || hasIDMessage(listOfMessage.subTupleEnd(1), id)
+  } else {
+    false;
+  }
+}
+
+
+// return the mainList updated
+// ListOfList = [messageAndDistance, messageAndDistance, ...]
+def dispatchEachList(listOfMessage, ListOfList, distanceList) {
+  if (ListOfList.size() > 0){
+    // dispacth one list
+    let listOfMessageUpdated = dispatchMessage(listOfMessage, ListOfList.get(0), distanceList);
+    //let listOfMessageUpdated = listOfMessage.append(ListOfList.get(0));
+    // continue to others
+    dispatchEachList(listOfMessageUpdated, ListOfList.subTupleEnd(1), distanceList)
+  } else {
+    listOfMessage
+  }
+}
+
+// return the list with or without the message (or delete if already present)
+// messageAndDistance = [message, distance]
+def dispatchMessage(listOfMessage, messageAndDistance, distanceList){
+  let nDistance = messageAndDistance.get(1);
+  // message is [destinationId, messageID, messageContent]
+  let message = messageAndDistance.get(0);
+  let destination = message.get(0);
+  let myDistance = getDistanceByID(distanceList, destination);
+    if(hasIDMessage(listOfMessage, message.get(1))) {
+        if (myDistance > nDistance){
+            listOfMessage.subtract([[message, myDistance]])
+        } else {
+            listOfMessage
+        }
+    } else {
+        // new message
+        if (myDistance < nDistance){
+            listOfMessage.union([[message, myDistance]])
+        } else {
+            listOfMessage
+        }
+    }
+}
+
+
+def updateMessageToSendWithDistance(messageToSend, distanceList){
+    if(messageToSend.size() > 0) {
+        let message = messageToSend.get(0);
+        let destinationID = message.get(0);
+        let distance = getDistanceByID(distanceList, destinationID);
+        [[message, distance]].union(updateMessageToSendWithDistance(messageToSend.subTupleEnd(1), distanceList))
+    } else {
+        []
+    }
+}
+
+def findDistance(listDevice){
+     if(listDevice.size() > 0){
+       let idList = listDevice.get(0);
+       let dist = distanceTo(idList)
+       [[idList, dist]].union(findDistance(listDevice.subTupleEnd(1)));
+     }else{
+       []
+     }
+   }
+
+   // return the minimun Distance from the device to the source
+   // NEED to add POISON REVERSE otherwise can never converge when a link go down
+   def distanceTo(idDestination) {
+     rep (d <- [1000, -1]) {
+       mux(idDestination == self.getID()) { [0, self.getID()]}
+       else {
+           let min = minHood(nbr(d))
+           [min.get(0)+1, min.get(1)]
+       }
+     }
+}
+
+
+
+// Program
+
+let myId = self.getID();
+// Get List of device that i can send message to
+let idOnlineList = [];
+let myProfile = self.getMyProfile();
+let profiles = [];
+let newProfiles = [];
+
+let distanceList = [];
+
+// update the list of device that are online and the distance to it
+rep (nbrDevice <- [myId]){
+	idOnlineList = unionHood PlusSelf(nbr(nbrDevice));
+}
+
+rep (nbrProfile <- [myProfile]) {
+    profiles = unionHood PlusSelf(nbr(nbrProfile));
+    newProfiles = profiles.subtract(nbrProfile);
+    profiles;
+}
+self.userOnline(idOnlineList);
+self.getProfiles(newProfiles);
+self.test(profiles);
+
+// distanceList = [[id, distance], ...]
+distanceList = findDistance(idOnlineList);
+
+
+// Message
+
+// need to send message if any
+// message = [destinationID, messageID, messageContent]
+// messageToSend = [[message], ...]
+let messageToSend = updateMessageToSendWithDistance(self.getMessageToSend(), distanceList);
+let messageToReturn = [];
+let nbrMessage = [];
+
+// listOfMessage = [[message, distance], ...]
+rep(listOfMessage <- []) {
+  // get message from device
+  listOfMessage = listOfMessage.union(messageToSend);
+  nbrMessage = unionHood(nbr(listOfMessage));
+
+  messageToReturn = dispatchEachList(listOfMessage, nbrMessage, distanceList);
+  // return message to the device if any
+  messageToReturn;
+}
+self.returnMessageToDevice(messageToReturn);
+true;

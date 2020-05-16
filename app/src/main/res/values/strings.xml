@@ -3,4 +3,6 @@
     <string name="go_lightweight">Go Lightweight</string>
     <string name="leave_lightweight">Leave Lightweight</string>
     <string name="connect">Connect</string>
+    <string name="imageuser">imageUser</string>
+    <string name="start_program">Start Program</string>
 </resources>

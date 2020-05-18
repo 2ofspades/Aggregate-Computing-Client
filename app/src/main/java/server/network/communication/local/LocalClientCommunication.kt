@@ -39,13 +39,13 @@ class LocalClientCommunication(device: PeerDevice, private val address: InetSock
         semaphoreObjectStream.release()
         this.isClient = localNetworkInformation.isClient()
         thread {
-            while (connection.isConnected) {
-                try {
+            try {
+                while (connection.isConnected) {
                     val message = extractMessage(connection)
                     server.tell(message)
-                } catch (exc: Exception) {
-                    exc.printStackTrace()
                 }
+            } catch (exc: Exception) {
+                exc.printStackTrace()
             }
         }
     }
@@ -53,10 +53,14 @@ class LocalClientCommunication(device: PeerDevice, private val address: InetSock
     override fun connect(onReceive: (Socket) -> Unit) {
         connection = Socket(address.address, address.port)
         thread {
-            outputStream = ObjectOutputStream(connection.getOutputStream())
-            semaphoreObjectStream.release()
-            inputStream = ObjectInputStream(connection.getInputStream()) // can be blocking
-            onReceive(connection)
+            try {
+                outputStream = ObjectOutputStream(connection.getOutputStream())
+                semaphoreObjectStream.release()
+                inputStream = ObjectInputStream(connection.getInputStream()) // can be blocking
+                onReceive(connection)
+            } catch (exc: Exception) {
+                exc.printStackTrace()
+            }
         }
     }
 

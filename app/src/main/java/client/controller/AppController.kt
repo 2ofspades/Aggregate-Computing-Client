@@ -42,7 +42,7 @@ class AppController(val app: Application) {
     val dataController = DataController(app)
     private val awareFactory = AwareNetFactory()
     private val networkController = NetworkController.createNetworkController(awareFactory)
-    val name = "Pix 3"
+    var name: String = "John Doe"
     private val protelistFileID: Int = R.raw.awarenet
     lateinit var server: RemoteDevice
     lateinit var device: EmulatedDevice

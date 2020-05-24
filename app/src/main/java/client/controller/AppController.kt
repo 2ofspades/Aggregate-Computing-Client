@@ -3,12 +3,13 @@ package client.controller
 import adapters.protelis.ProtelisAdapter
 import adapters.protelis.ProtelisContext
 import android.app.Application
-import client.controller.data.protelis.AwareNetFactory
+import client.controller.protelis.AwareNetFactory
 import client.controller.data.DataController
 import client.controller.data.db.User
 import client.controller.data.networkdataclass.MessageNetwork
 import client.controller.data.networkdataclass.ProfileNetwork
-import client.controller.data.protelis.UserUID
+import client.controller.protelis.AwareContext
+import client.controller.protelis.UserUID
 import communication.Message
 import communication.MessageType
 import communication.implements.LocalNetworkController
@@ -41,7 +42,7 @@ class AppController(val app: Application) {
     val dataController = DataController(app)
     private val awareFactory = AwareNetFactory()
     private val networkController = NetworkController.createNetworkController(awareFactory)
-    val name = "Pix 1"
+    val name = "Pix 3"
     private val protelistFileID: Int = R.raw.awarenet
     lateinit var server: RemoteDevice
     lateinit var device: EmulatedDevice
@@ -210,121 +211,5 @@ class AppController(val app: Application) {
             list += messageNetwork
         }
         return list
-    }
-
-    class AwareContext(private val device: Device, networkManager: NetworkManager) :
-        ProtelisContext(device, networkManager) {
-
-        private val user = getAppController()!!.dataController.mainUser
-        override fun instance(): ProtelisContext =
-            AwareContext(device, networkManager)
-
-        //test
-        private val profileAlreadyRead = mutableSetOf<UUID>()
-        private val messageAlreadyRead = mutableSetOf<UUID>()
-        private val iteration = Semaphore(1)
-
-        override fun getDeviceUID(): DeviceUID {
-            return device.id
-        }
-
-        fun announce(something: String) = device.showResult("$device - $something")
-        fun getName() = device.toString()
-
-        fun testMessage(arrayTupleImpl: ArrayTupleImpl){
-            val size = arrayTupleImpl.size()
-        }
-
-        fun userOnline(arrayUserOnline: ArrayTupleImpl) {
-            val listOfIdUser = mutableListOf<UUID>()
-            try {
-                arrayUserOnline.iterator().forEach {
-                    if (it as DeviceUID != deviceUID){
-                        if (it is UserUID)
-                            listOfIdUser += it.uuid
-                    }
-                }
-            } catch (exc: Exception) {
-                exc.printStackTrace()
-            }
-
-            if (listOfIdUser.isNotEmpty())
-                getAppController()?.userOnline(listOfIdUser)
-        }
-
-        fun getMyProfile(): Any {
-            iteration.acquire()
-            val myUserUID = device.id as UserUID
-            return ProfileNetwork(myUserUID.uuid, user.username, user.interest, null)
-        }
-
-        fun getProfiles(arrayTupleImpl: ArrayTupleImpl) {
-            val profiles = mutableListOf<ProfileNetwork>()
-            arrayTupleImpl.iterator().forEach {
-                try {
-                    val user = it as ProfileNetwork
-                    //val user = it.get(0) as ProfileNetwork
-                    if (!profileAlreadyRead.contains(user.userUUID)) {
-                        profileAlreadyRead.add(user.userUUID)
-                        profiles += user
-                    }
-                } catch (exc: Exception) {
-                    exc.printStackTrace()
-                }
-
-            }
-            if (profiles.isNotEmpty())
-                getAppController()?.profiles(profiles)
-        }
-
-        // only for testing
-        fun checkDistance(arrayTupleImpl: ArrayTupleImpl) {
-            var str = "$device distanceKnown: "
-            arrayTupleImpl.iterator().forEach {
-                str += "$it "
-            }
-            device.showResult(str)
-        }
-
-        fun getMessageToSend(): ArrayTupleImpl {
-            var arrayTupleImpl = ArrayTupleImpl()
-
-            // can be blocking
-            val messageToSend = getAppController()?.messageToSend()
-            messageToSend?.iterator()?.forEach {
-                var arrayMessage = ArrayTupleImpl()
-                val destination = UserUID(it.destination)
-                val messageId = it.uid
-                arrayMessage = arrayMessage.append(destination) as ArrayTupleImpl
-                arrayMessage = arrayMessage.append(messageId) as ArrayTupleImpl
-                arrayMessage = arrayMessage.append(it) as ArrayTupleImpl
-                arrayTupleImpl = arrayTupleImpl.append(arrayMessage) as ArrayTupleImpl
-            }
-            return arrayTupleImpl
-        }
-
-        fun returnMessageToDevice(messageToReturn: ArrayTupleImpl) {
-            val listOfMessage = mutableListOf<MessageNetwork>()
-
-            messageToReturn.iterator().forEach {
-                try {
-                    val myUserUID = device.id as UserUID
-                    it as ArrayTupleImpl
-                    val message = it.get(0) as ArrayTupleImpl
-                    if (message.get(0) == myUserUID) {
-                        val messageNetwork = message.get(2) as MessageNetwork
-                        if (!messageAlreadyRead.contains(messageNetwork.uid)) {
-                            messageAlreadyRead.add(messageNetwork.uid)
-                            listOfMessage += messageNetwork
-                        }
-                    }
-                } catch (exc: Exception) {
-                    exc.printStackTrace()
-                }
-            }
-            if (listOfMessage.isNotEmpty())
-                getAppController()?.messageArrived(listOfMessage)
-            iteration.release()
-        }
     }
 }

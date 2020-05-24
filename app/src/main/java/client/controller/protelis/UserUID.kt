@@ -1,4 +1,4 @@
-package client.controller.data.protelis
+package client.controller.protelis
 
 
 import org.protelis.lang.datatype.DeviceUID

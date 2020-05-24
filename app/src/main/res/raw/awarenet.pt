@@ -9,7 +9,6 @@ def getDistanceByID(distanceList, id){
         }
     } else {
         // Infinity
-        //self.testMessage(distanceList);
         1000
     }
 }
@@ -129,7 +128,6 @@ self.getProfiles(newProfiles);
 
 // distanceList = [[id, distance], ...]
 distanceList = findDistance(idOnlineList);
-self.testMessage(distanceList);
 // Message
 
 // need to send message if any

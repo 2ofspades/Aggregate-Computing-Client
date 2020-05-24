@@ -25,7 +25,9 @@ class DataController(app: Application) {
             userDao = db.userDao()
             messageBoxDao = db.messageBoxDao()
             messageDao = db.messageDao()
-            deleteAllData()
+            deleteAllData() // test
+            insertMainUser()
+
         }
     }
 
@@ -36,16 +38,16 @@ class DataController(app: Application) {
     }
 
     // Only for testing
-    suspend fun insertMainUser() {
+    private suspend fun insertMainUser() {
         mainUser =
-            User(uid = 0, isMainUser = true, username = AppController.getAppController()!!.name)
+            User(uid = UUID.randomUUID(), isMainUser = true, username = AppController.getAppController()!!.name)
         insert(mainUser)
     }
 
     suspend fun insert(user: User) {
         // need to make sure the user doesn't already exist in the table
         userDao.insert(user)
-        val messageBox = MessageBox(userId = user.uid)
+        val messageBox = MessageBox(userUUID = user.uid)
         messageBoxDao.insert(messageBox)
     }
 
@@ -53,11 +55,11 @@ class DataController(app: Application) {
         userDao.update(user)
     }
 
-    suspend fun getUser(userID: Int): User {
+    suspend fun getUser(userID: UUID): User? {
         return userDao.suspendGetUserById(userID)
     }
 
-    suspend fun userOnline(listOfID: List<Int>) {
+    suspend fun userOnline(listOfID: List<UUID>) {
         val userOnline = userDao.getUserById(listOfID)
         userOnline.iterator().forEach {
             it.isOnline = true
@@ -66,7 +68,7 @@ class DataController(app: Application) {
         // need to set the previous online offline
     }
 
-    suspend fun getMessageBox(userId: Int): MessageBox {
+    suspend fun getMessageBox(userId: UUID): MessageBox? {
         return messageBoxDao.getMessageBoxByUserId(userId)
     }
 
@@ -92,15 +94,15 @@ class DataController(app: Application) {
         return list
     }
 
-    fun getMessage(user_uid: Int): LiveData<List<Message>> {
+    fun getMessage(user_uid: UUID): LiveData<List<Message>> {
         return messageBoxDao.getMessageFromThisUser(user_uid)
     }
 
-    suspend fun sendMessage(content: String, userId: Int) {
+    suspend fun sendMessage(content: String, userId: UUID) {
         val messageBox = getMessageBox(userId)
         if (messageBox != null) {
             val message = Message(
-                userId = userId, content = content, date = Date(System.currentTimeMillis()),
+                userUUID = userId, content = content, date = Date(System.currentTimeMillis()),
                 messageBoxId = messageBox.uid, typeContent = 1, isSentByMainUser = true
             )
             insert(message)

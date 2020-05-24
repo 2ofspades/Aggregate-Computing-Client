@@ -1,8 +1,6 @@
 package client.view.userlist
 
 import android.content.Context
-import android.content.Intent
-import android.provider.ContactsContract
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
@@ -10,12 +8,11 @@ import android.widget.ImageView
 import android.widget.TextView
 import androidx.recyclerview.widget.RecyclerView
 import client.controller.data.db.User
-import client.view.messagelist.UserMessageListActivity
 import it.unibo.aggregatecomputingclient.R
-import kotlin.coroutines.coroutineContext
+import java.util.*
 
 
-class UserListAdapter(val context: Context, val onClickAction: (Int) -> Unit) :
+class UserListAdapter(context: Context, val onClickAction: (UUID) -> Unit) :
     RecyclerView.Adapter<UserListAdapter.UserViewHolder>() {
 
     private val mInflater: LayoutInflater = LayoutInflater.from(context)
@@ -23,8 +20,8 @@ class UserListAdapter(val context: Context, val onClickAction: (Int) -> Unit) :
 
     class UserViewHolder(itemView: View) : RecyclerView.ViewHolder(itemView) {
 
-        lateinit var onClickActivity: (Int) -> Unit
-        var uid: Int? = null
+        lateinit var onClickActivity: (UUID) -> Unit
+        var uid: UUID? = null
         var userImage: ImageView = itemView.findViewById(R.id.userListImageViewId)
         var usernameTextView: TextView = itemView.findViewById(R.id.userListTextViewUsernameId)
         var infoTextView: TextView = itemView.findViewById(R.id.userListTextViewInfoId)

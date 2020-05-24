@@ -3,25 +3,27 @@ package client.controller
 import adapters.protelis.ProtelisAdapter
 import adapters.protelis.ProtelisContext
 import android.app.Application
+import client.controller.data.protelis.AwareNetFactory
 import client.controller.data.DataController
 import client.controller.data.db.User
 import client.controller.data.networkdataclass.MessageNetwork
 import client.controller.data.networkdataclass.ProfileNetwork
+import client.controller.data.protelis.UserUID
 import communication.Message
 import communication.MessageType
-import devices.implementations.VirtualDevice
+import communication.implements.LocalNetworkController
+import controller.NetworkController
 import devices.interfaces.Device
 import it.unibo.aggregatecomputingclient.R
 import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.launch
+import org.protelis.lang.datatype.DeviceUID
 
 import org.protelis.lang.datatype.impl.ArrayTupleImpl
 import org.protelis.vm.NetworkManager
 
-import server.devices.PeerDevice
-import server.network.NetworkController
-import server.network.ServerSupport
-import server.network.communication.local.LocalNetworkController
+import devices.interfaces.EmulatedDevice
+import devices.interfaces.RemoteDevice
 import java.io.BufferedReader
 import java.io.InputStreamReader
 import java.io.Serializable
@@ -37,11 +39,12 @@ class AppController(val app: Application) {
 
 
     val dataController = DataController(app)
-    private val networkController: NetworkController = NetworkController { ServerSupport }
-    val name = "Pix 3"
+    private val awareFactory = AwareNetFactory()
+    private val networkController = NetworkController.createNetworkController(awareFactory)
+    val name = "Pix 1"
     private val protelistFileID: Int = R.raw.awarenet
-    lateinit var server: PeerDevice
-    lateinit var device: VirtualDevice
+    lateinit var server: RemoteDevice
+    lateinit var device: EmulatedDevice
     val ip: InetAddress = InetAddress.getLoopbackAddress()
     var port: Int? = null
 
@@ -75,7 +78,8 @@ class AppController(val app: Application) {
     }
 
     fun start(port: Int = 2001) {
-        localNetworkController = LocalNetworkController(ServerSupport, SERVER_ADDRESS, port)
+        val mainUser = dataController.mainUser
+        localNetworkController = LocalNetworkController(networkController.support, serverAddress = SERVER_ADDRESS, serverPort = port)
         networkController.addController(localNetworkController)
         networkController.startServer()
         this.port = port
@@ -83,27 +87,14 @@ class AppController(val app: Application) {
         thread {
             networkController.getMainServer({
                 server = it
-                val message = Message(-1, MessageType.Join)
+                val message = Message(awareFactory.createIdFromUUID(mainUser.uid),
+                    MessageType.Join, awareFactory.createIdFromUUID(mainUser.uid))
                 server.tell(message)
             }, { message ->
                 if (message.type == MessageType.ID) {
-                    GlobalScope.launch {
-                        val mainUser = User(message.content as Int, true, true, name)
-                        dataController.insert(mainUser)
-                        dataController.mainUser = mainUser
-                        sem.release()
-                    }
-                    device = VirtualDevice(message.content as Int, name,
-                        {
-                            ProtelisAdapter(
-                                it,
-                                readFromRaw(protelistFileID),
-                                ::AwareContext,
-                                server
-                            )
-                        }, {
-                            objectArrived(it)
-                        })
+                    sem.release()
+                    device = awareFactory.createEmulatedDevice(awareFactory.createIdFromUUID(mainUser.uid),
+                        name, {ProtelisAdapter(it, readFromRaw(protelistFileID), ::AwareContext, server)})
                     sem.release()
                 } else {
                     if (this::device.isInitialized)
@@ -115,9 +106,11 @@ class AppController(val app: Application) {
             sem.acquire()
             Thread.sleep(3000)
             while (true) {
-                ServerSupport.execute()
-                System.gc()
-                Thread.sleep(1000)
+                synchronized(device){
+                    device.execute()
+                    System.gc()
+                    Thread.sleep(1000)
+                }
             }
 
         }
@@ -148,21 +141,21 @@ class AppController(val app: Application) {
         return text
     }
 
-    fun userOnline(list: MutableList<Int>) {
+    fun userOnline(list: MutableList<UUID>) {
         GlobalScope.launch { dataController.userOnline(list) }
     }
 
     fun profiles(list: MutableList<ProfileNetwork>) {
         GlobalScope.launch {
             list.iterator().forEach {
-                val user = dataController.getUser(it.userID)
+                val user = dataController.getUser(it.userUUID)
                 if (user == null) {
                     dataController.insert(
                         User(
-                            it.userID,
-                            false,
-                            true,
-                            it.username,
+                            it.userUUID,
+                            isMainUser = false,
+                            isOnline = true,
+                            username = it.username,
                             interest = it.interest
                         )
                     )
@@ -192,7 +185,7 @@ class AppController(val app: Application) {
             list.iterator().forEach {
                 val messageBox = dataController.getMessageBox(it.sender)
                 val message = dataController.getMessageFromUUID(it.uid)
-                if (message == null) {
+                if (message == null && messageBox != null) {
                     val sender = it.sender
                     val messageId = it.uid
                     // now we assume is a text
@@ -213,7 +206,7 @@ class AppController(val app: Application) {
         val list = mutableListOf<MessageNetwork>()
         dataController.getMessageToSendFromList().iterator().forEach {
             val messageNetwork =
-                MessageNetwork(it.uid, dataController.mainUser.uid, it.userId, it.date, it.content)
+                MessageNetwork(it.uid, dataController.mainUser.uid, it.userUUID, it.date, it.content)
             list += messageNetwork
         }
         return list
@@ -227,29 +220,29 @@ class AppController(val app: Application) {
             AwareContext(device, networkManager)
 
         //test
-        private val profileAlreadyRead = mutableSetOf<Int>()
+        private val profileAlreadyRead = mutableSetOf<UUID>()
         private val messageAlreadyRead = mutableSetOf<UUID>()
         private val iteration = Semaphore(1)
+
+        override fun getDeviceUID(): DeviceUID {
+            return device.id
+        }
 
         fun announce(something: String) = device.showResult("$device - $something")
         fun getName() = device.toString()
 
-        fun getID(): Int {
-            return device.id
-        }
-
-        fun test(testArrayProfiles: ArrayTupleImpl) {
-            val size = testArrayProfiles.size()
-            val elem = testArrayProfiles.get(0) as ProfileNetwork
-            print(size)
+        fun testMessage(arrayTupleImpl: ArrayTupleImpl){
+            val size = arrayTupleImpl.size()
         }
 
         fun userOnline(arrayUserOnline: ArrayTupleImpl) {
-            val listOfIdUser = mutableListOf<Int>()
+            val listOfIdUser = mutableListOf<UUID>()
             try {
                 arrayUserOnline.iterator().forEach {
-                    if (it as Int != device.id)
-                        listOfIdUser += it
+                    if (it as DeviceUID != deviceUID){
+                        if (it is UserUID)
+                            listOfIdUser += it.uuid
+                    }
                 }
             } catch (exc: Exception) {
                 exc.printStackTrace()
@@ -261,7 +254,8 @@ class AppController(val app: Application) {
 
         fun getMyProfile(): Any {
             iteration.acquire()
-            return ProfileNetwork(device.id, user.username, user.interest, null)
+            val myUserUID = device.id as UserUID
+            return ProfileNetwork(myUserUID.uuid, user.username, user.interest, null)
         }
 
         fun getProfiles(arrayTupleImpl: ArrayTupleImpl) {
@@ -270,8 +264,8 @@ class AppController(val app: Application) {
                 try {
                     val user = it as ProfileNetwork
                     //val user = it.get(0) as ProfileNetwork
-                    if (!profileAlreadyRead.contains(user.userID)) {
-                        profileAlreadyRead.add(user.userID)
+                    if (!profileAlreadyRead.contains(user.userUUID)) {
+                        profileAlreadyRead.add(user.userUUID)
                         profiles += user
                     }
                 } catch (exc: Exception) {
@@ -299,7 +293,7 @@ class AppController(val app: Application) {
             val messageToSend = getAppController()?.messageToSend()
             messageToSend?.iterator()?.forEach {
                 var arrayMessage = ArrayTupleImpl()
-                val destination = it.destination
+                val destination = UserUID(it.destination)
                 val messageId = it.uid
                 arrayMessage = arrayMessage.append(destination) as ArrayTupleImpl
                 arrayMessage = arrayMessage.append(messageId) as ArrayTupleImpl
@@ -314,9 +308,10 @@ class AppController(val app: Application) {
 
             messageToReturn.iterator().forEach {
                 try {
+                    val myUserUID = device.id as UserUID
                     it as ArrayTupleImpl
                     val message = it.get(0) as ArrayTupleImpl
-                    if (message.get(0) == device.id) {
+                    if (message.get(0) == myUserUID) {
                         val messageNetwork = message.get(2) as MessageNetwork
                         if (!messageAlreadyRead.contains(messageNetwork.uid)) {
                             messageAlreadyRead.add(messageNetwork.uid)
@@ -332,5 +327,4 @@ class AppController(val app: Application) {
             iteration.release()
         }
     }
-
 }

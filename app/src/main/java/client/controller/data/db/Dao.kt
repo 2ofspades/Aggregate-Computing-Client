@@ -2,7 +2,6 @@ package client.controller.data.db
 
 import androidx.lifecycle.LiveData
 import androidx.room.*
-import androidx.room.OnConflictStrategy.FAIL
 import java.util.*
 
 
@@ -22,13 +21,13 @@ interface UserDao {
     suspend fun deleteAll()
 
     @Query("SELECT * FROM user_table WHERE uid = :id")
-    suspend fun suspendGetUserById(id: Int): User
+    suspend fun suspendGetUserById(id: UUID): User?
 
     @Query("SELECT * FROM user_table WHERE uid = :id")
-    fun getUserById(id: Int): LiveData<List<User>>
+    fun getUserById(id: UUID): LiveData<List<User>>
 
     @Query("SELECT * FROM user_table WHERE uid in (:listID) ")
-    suspend fun getUserById(listID: List<Int>): List<User>
+    suspend fun getUserById(listID: List<UUID>): List<User>
 
     @Query("SELECT * FROM user_table")
     fun getAllUser(): LiveData<List<User>>
@@ -52,7 +51,7 @@ interface MessageBoxDao {
     suspend fun deleteAll()
 
     @Query("SELECT * FROM message_box_table WHERE user_id= :uid")
-    suspend fun getMessageBoxByUserId(uid: Int): MessageBox
+    suspend fun getMessageBoxByUserId(uid: UUID): MessageBox?
 
     @Transaction
     @Query("SELECT * FROM message_box_table WHERE uid = :messageBoxId")
@@ -63,7 +62,7 @@ interface MessageBoxDao {
     fun getMessageInThisMessageBox(uid: Int): LiveData<List<Message>>
 
     @Query("SELECT * FROM message_table WHERE user_id = :uid")
-    fun getMessageFromThisUser(uid: Int): LiveData<List<Message>>
+    fun getMessageFromThisUser(uid: UUID): LiveData<List<Message>>
 
 }
 
@@ -80,9 +79,9 @@ interface MessageDao {
     suspend fun delete(message: Message)
 
     @Query("DELETE FROM message_table")
-    suspend fun deleteAll(): Int
+    suspend fun deleteAll()
 
     @Query("SELECT * FROM message_table WHERE uid = :uid LIMIT 1")
-    suspend fun getThisMessage(uid: UUID): Message
+    suspend fun getThisMessage(uid: UUID): Message?
 
 }

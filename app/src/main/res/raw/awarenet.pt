@@ -9,6 +9,7 @@ def getDistanceByID(distanceList, id){
         }
     } else {
         // Infinity
+        //self.testMessage(distanceList);
         1000
     }
 }
@@ -30,7 +31,7 @@ def hasIDMessage(listOfMessage, id){
 // ListOfList = [messageAndDistance, messageAndDistance, ...]
 def dispatchEachList(listOfMessage, ListOfList, distanceList) {
   if (ListOfList.size() > 0){
-    // dispacth one list
+    // dispatch one list
     let listOfMessageUpdated = dispatchMessage(listOfMessage, ListOfList.get(0), distanceList);
     //let listOfMessageUpdated = listOfMessage.append(ListOfList.get(0));
     // continue to others
@@ -80,6 +81,8 @@ def findDistance(listDevice){
      if(listDevice.size() > 0){
        let idList = listDevice.get(0);
        let dist = distanceTo(idList)
+       //wrapper for null (empty tuple)
+       let dist = [dist.get(0), dist.get(1)]
        [[idList, dist]].union(findDistance(listDevice.subTupleEnd(1)));
      }else{
        []
@@ -90,7 +93,7 @@ def findDistance(listDevice){
    // NEED to add POISON REVERSE otherwise can never converge when a link go down
    def distanceTo(idDestination) {
      rep (d <- [1000, -1]) {
-       mux(idDestination == self.getID()) { [0, self.getID()]}
+       mux(idDestination == self.getDeviceUID()) { [0, self.getDeviceUID()]}
        else {
            let min = minHood(nbr(d))
            [min.get(0)+1, min.get(1)]
@@ -102,7 +105,7 @@ def findDistance(listDevice){
 
 // Program
 
-let myId = self.getID();
+let myId = self.getDeviceUID();
 // Get List of device that i can send message to
 let idOnlineList = [];
 let myProfile = self.getMyProfile();
@@ -123,12 +126,10 @@ rep (nbrProfile <- [myProfile]) {
 }
 self.userOnline(idOnlineList);
 self.getProfiles(newProfiles);
-self.test(profiles);
 
 // distanceList = [[id, distance], ...]
 distanceList = findDistance(idOnlineList);
-
-
+self.testMessage(distanceList);
 // Message
 
 // need to send message if any

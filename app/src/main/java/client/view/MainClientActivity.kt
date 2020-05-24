@@ -3,20 +3,14 @@ package client.view
 import android.content.Intent
 import android.os.Bundle
 import android.widget.Button
-import android.widget.EditText
 import android.widget.TextView
 import androidx.appcompat.app.AppCompatActivity
 import client.controller.AppController
 import client.view.userlist.UserListActivity
 import it.unibo.aggregatecomputingclient.R
-import kotlinx.coroutines.GlobalScope
-import kotlinx.coroutines.launch
 
 import java.lang.Exception
 import java.net.InetAddress
-import java.util.concurrent.ThreadLocalRandom
-import kotlin.math.roundToInt
-import kotlin.random.Random
 
 
 class MainClientActivity : AppCompatActivity() {
@@ -25,7 +19,6 @@ class MainClientActivity : AppCompatActivity() {
     lateinit var myPortTextView: TextView
     lateinit var remoteAddressTextView: TextView
     lateinit var remotePortTextView: TextView
-    lateinit var myTextUsername: EditText
 
 
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -35,9 +28,6 @@ class MainClientActivity : AppCompatActivity() {
         myPortTextView = findViewById(R.id.textMyPort)
         remoteAddressTextView = findViewById(R.id.connectAddress)
         remotePortTextView = findViewById(R.id.connectPort)
-        myTextUsername = findViewById(R.id.textMyUsername)
-        val username = "John Doe " + (1..200).shuffled().first()
-        myTextUsername.setText(username)
 
         val startProgramButton = findViewById<Button>(R.id.startButton)
         startProgramButton.setOnClickListener {
@@ -59,8 +49,6 @@ class MainClientActivity : AppCompatActivity() {
 
     private fun startServerAction(v: Bundle?) {
         val appController = AppController.getAppController(application)
-        appController.name = myTextUsername.text.toString()
-
         val portStr = myPortTextView.text.toString()
         if (portStr.isNotEmpty() && portStr != "0") {
             try {
@@ -80,10 +68,6 @@ class MainClientActivity : AppCompatActivity() {
 
     private fun startProgram(v: Bundle?) {
         val o = Intent(this, UserListActivity::class.java)
-        val username = myTextUsername.text.toString()
-        val dataController = AppController.getAppController()!!.dataController
-        dataController.mainUser.username = username
-        GlobalScope.launch { dataController.updateUser(dataController.mainUser) }
         startActivity(o)
     }
 

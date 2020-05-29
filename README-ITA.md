@@ -13,7 +13,7 @@ In questa prima fase si pone l'obbiettivo di scrivere il programma protelis ed i
 
 
 * ###### Modalità remota
-  - Il Client (tramite la libreria in Aggregate Computing Backend) cerca un server a cui connettersi attraverso i framework che il Client device di utilizzare
+  - Il Client (tramite la libreria in Aggregate Computing Backend) cerca un server a cui connettersi attraverso i framework che il Client decide di utilizzare
 
 
 * ###### Modalità ibrida:

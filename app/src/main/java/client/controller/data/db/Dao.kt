@@ -29,7 +29,7 @@ interface UserDao {
     @Query("SELECT * FROM user_table WHERE uid in (:listID) ")
     suspend fun getUserById(listID: List<UUID>): List<User>
 
-    @Query("SELECT * FROM user_table")
+    @Query("SELECT * FROM user_table WHERE is_main_user = 0")
     fun getAllUser(): LiveData<List<User>>
 
     @Transaction

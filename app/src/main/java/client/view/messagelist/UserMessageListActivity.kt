@@ -21,7 +21,6 @@ class UserMessageListActivity : AppCompatActivity() {
     lateinit var userMessageListViewModel: UserMessageListViewModel
     lateinit var editTextToSend: EditText
     lateinit var sendButton: Button
-
     lateinit var uid: UUID
 
     override fun onCreate(savedInstanceState: Bundle?) {

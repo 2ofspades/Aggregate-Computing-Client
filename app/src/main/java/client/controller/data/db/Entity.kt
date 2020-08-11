@@ -9,6 +9,7 @@ import java.util.*
 @Entity(tableName = "user_table")
 data class User(
     @PrimaryKey val uid: UUID,
+
     @ColumnInfo(name = "is_main_user") val isMainUser: Boolean = false,
     var isOnline: Boolean = false,
     var username: String,
@@ -20,6 +21,7 @@ data class User(
 data class MessageBox(
     @PrimaryKey(autoGenerate = true) val uid: Int = 0,
     @ColumnInfo(name = "user_id") val userUUID: UUID
+
 )
 
 
@@ -27,6 +29,7 @@ data class MessageBox(
 data class Message(
     @PrimaryKey val uid: UUID = UUID.randomUUID(),
     @ColumnInfo(name = "user_id") val userUUID: UUID,
+
     @ColumnInfo(name = "message_box_id") val messageBoxId: Int,
     @ColumnInfo(name = "time") val date: Date,
     @ColumnInfo(name = "sent_by_main_user") val isSentByMainUser: Boolean,

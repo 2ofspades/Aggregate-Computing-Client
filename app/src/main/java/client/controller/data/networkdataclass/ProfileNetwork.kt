@@ -5,6 +5,7 @@ import java.util.*
 
 class ProfileNetwork(
     val userUUID: UUID,
+
     val username: String,
     val interest: String,
     val image: Serializable?
@@ -28,6 +29,5 @@ class ProfileNetwork(
     override fun hashCode(): Int {
         return userUUID.hashCode()
     }
-
 
 }

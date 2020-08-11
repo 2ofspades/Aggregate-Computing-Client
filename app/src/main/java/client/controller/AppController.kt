@@ -4,6 +4,7 @@ import adapters.protelis.ProtelisAdapter
 import adapters.protelis.ProtelisContext
 import android.app.Application
 import client.controller.protelis.AwareNetFactory
+
 import client.controller.data.DataController
 import client.controller.data.db.User
 import client.controller.data.networkdataclass.MessageNetwork
@@ -22,9 +23,9 @@ import org.protelis.lang.datatype.DeviceUID
 
 import org.protelis.lang.datatype.impl.ArrayTupleImpl
 import org.protelis.vm.NetworkManager
-
 import devices.interfaces.EmulatedDevice
 import devices.interfaces.RemoteDevice
+
 import java.io.BufferedReader
 import java.io.InputStreamReader
 import java.io.Serializable
@@ -81,6 +82,7 @@ class AppController(val app: Application) {
     fun start(port: Int = 2001) {
         val mainUser = dataController.mainUser
         localNetworkController = LocalNetworkController(networkController.support, serverAddress = SERVER_ADDRESS, serverPort = port)
+
         networkController.addController(localNetworkController)
         networkController.startServer()
         this.port = port
@@ -157,6 +159,7 @@ class AppController(val app: Application) {
                             isMainUser = false,
                             isOnline = true,
                             username = it.username,
+
                             interest = it.interest
                         )
                     )
@@ -187,6 +190,7 @@ class AppController(val app: Application) {
                 val messageBox = dataController.getMessageBox(it.sender)
                 val message = dataController.getMessageFromUUID(it.uid)
                 if (message == null && messageBox != null) {
+
                     val sender = it.sender
                     val messageId = it.uid
                     // now we assume is a text

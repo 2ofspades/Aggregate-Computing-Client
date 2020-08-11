@@ -7,6 +7,7 @@ import client.controller.AppController
 import client.controller.data.db.Message
 import java.util.*
 
+
 class UserMessageListViewModel(application: Application) : AndroidViewModel(application) {
 
     val dataController = AppController.getAppController(application).dataController

@@ -8,6 +8,7 @@ import android.widget.ImageView
 import android.widget.TextView
 import androidx.recyclerview.widget.RecyclerView
 import client.controller.data.db.User
+
 import it.unibo.aggregatecomputingclient.R
 import java.util.*
 

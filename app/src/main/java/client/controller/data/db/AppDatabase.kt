@@ -1,11 +1,13 @@
 package client.controller.data.db
 
 import android.content.Context
+
 import androidx.room.Database
 import androidx.room.Room
 import androidx.room.RoomDatabase
 import androidx.room.TypeConverters
 import kotlinx.coroutines.CoroutineScope
+
 
 
 @Database(
@@ -43,7 +45,6 @@ abstract class AwareNetDatabase : RoomDatabase() {
 
         private class AwareNetDatabaseCallBack(private val scope: CoroutineScope) :
             RoomDatabase.Callback() {
-
             fun populateDatabase(mainUser: UserDao) {
                 // for testing
                 // Add your own user

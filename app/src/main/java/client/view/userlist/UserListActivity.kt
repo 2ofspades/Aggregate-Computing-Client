@@ -37,6 +37,7 @@ class UserListActivity : AppCompatActivity() {
         val intent = Intent(this, UserMessageListActivity::class.java)
         val bundle = Bundle()
         bundle.putSerializable("uid", uid)
+
         intent.putExtras(bundle)
         startActivity(intent)
         finish()

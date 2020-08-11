@@ -1,14 +1,13 @@
 package client.controller.data.db
 
 import android.content.Context
-import android.util.Log
+
 import androidx.room.Database
 import androidx.room.Room
 import androidx.room.RoomDatabase
 import androidx.room.TypeConverters
-import androidx.sqlite.db.SupportSQLiteDatabase
 import kotlinx.coroutines.CoroutineScope
-import kotlinx.coroutines.launch
+
 
 
 @Database(
@@ -46,19 +45,7 @@ abstract class AwareNetDatabase : RoomDatabase() {
 
         private class AwareNetDatabaseCallBack(private val scope: CoroutineScope) :
             RoomDatabase.Callback() {
-            override fun onOpen(db: SupportSQLiteDatabase) {
-                super.onOpen(db)
-                /*
-                INSTANCE?.let { database ->
-                    scope.launch {
-                        populateDatabase(database.userDao)
-                    }
-                }
-
-                 */
-            }
-
-            suspend fun populateDatabase(mainUser: UserDao) {
+            fun populateDatabase(mainUser: UserDao) {
                 // for testing
                 // Add your own user
 

@@ -6,6 +6,18 @@
     android:layout_height="match_parent"
     tools:context="client.view.MainClientActivity">
 
+    <TextView
+        android:id="@+id/labelMyUsername"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginStart="30dp"
+        android:layout_marginTop="28dp"
+        android:text="My username"
+        android:textAppearance="@style/TextAppearance.AppCompat.Large"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent" />
+
+
     <Button
         android:id="@+id/startButton"
         android:layout_width="wrap_content"
@@ -56,6 +68,17 @@
         app:layout_constraintStart_toEndOf="@+id/textViewMyAddress"
         app:layout_constraintTop_toBottomOf="@+id/textMyAddressLabel" />
 
+    <EditText
+        android:id="@+id/textMyUsername"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginStart="30dp"
+        android:layout_marginTop="12dp"
+        android:hint="username"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/labelMyUsername" />
+
+
     <TextView
         android:id="@+id/textMyAddressLabel"
         android:layout_width="wrap_content"
@@ -65,7 +88,8 @@
         android:text="My address"
         android:textAppearance="@style/TextAppearance.AppCompat.Large"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toTopOf="parent" />
+        app:layout_constraintTop_toBottomOf="@+id/textMyUsername" />
+
 
     <EditText
         android:id="@+id/textViewMyAddress"

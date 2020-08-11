@@ -1,9 +1,13 @@
+// return the distance to id if any
+// distanceList = [[id, distance], ...]
+// distance = [distanceValue, ID] - see distanceTo for more details about the ID (isn't the destination id)
 def getDistanceByID(distanceList, id){
     if(distanceList.size() > 0) {
-        let tuple = distanceList.get(0);
-        let idList = tuple.get(0);
+        let idAndDistance = distanceList.get(0);
+        let idList = idAndDistance.get(0);
         if (idList == id) {
-            tuple.get(1).get(0)
+            idAndDistance.get(1).get(0)
+
         } else {
             getDistanceByID(distanceList.subTupleEnd(1), id)
         }
@@ -30,7 +34,8 @@ def hasIDMessage(listOfMessage, id){
 // ListOfList = [messageAndDistance, messageAndDistance, ...]
 def dispatchEachList(listOfMessage, ListOfList, distanceList) {
   if (ListOfList.size() > 0){
-    // dispacth one list
+    // dispatch one list
+
     let listOfMessageUpdated = dispatchMessage(listOfMessage, ListOfList.get(0), distanceList);
     //let listOfMessageUpdated = listOfMessage.append(ListOfList.get(0));
     // continue to others
@@ -64,6 +69,7 @@ def dispatchMessage(listOfMessage, messageAndDistance, distanceList){
     }
 }
 
+// return the message with the distance to message destination
 
 def updateMessageToSendWithDistance(messageToSend, distanceList){
     if(messageToSend.size() > 0) {
@@ -76,21 +82,27 @@ def updateMessageToSendWithDistance(messageToSend, distanceList){
     }
 }
 
+// return a list [id, distance]
+
 def findDistance(listDevice){
      if(listDevice.size() > 0){
        let idList = listDevice.get(0);
        let dist = distanceTo(idList)
+       //wrapper for null (empty tuple)
+       let dist = [dist.get(0), dist.get(1)]
+
        [[idList, dist]].union(findDistance(listDevice.subTupleEnd(1)));
      }else{
        []
      }
    }
 
-   // return the minimun Distance from the device to the source
-   // NEED to add POISON REVERSE otherwise can never converge when a link go down
-   def distanceTo(idDestination) {
+// return the minimun Distance from the device to the source
+// NEED to add POISON REVERSE otherwise can never converge when a link go down
+def distanceTo(idDestination) {
      rep (d <- [1000, -1]) {
-       mux(idDestination == self.getID()) { [0, self.getID()]}
+       mux(idDestination == self.getDeviceUID()) { [0, self.getDeviceUID()]}
+
        else {
            let min = minHood(nbr(d))
            [min.get(0)+1, min.get(1)]
@@ -102,7 +114,8 @@ def findDistance(listDevice){
 
 // Program
 
-let myId = self.getID();
+let myId = self.getDeviceUID();
+
 // Get List of device that i can send message to
 let idOnlineList = [];
 let myProfile = self.getMyProfile();
@@ -123,11 +136,9 @@ rep (nbrProfile <- [myProfile]) {
 }
 self.userOnline(idOnlineList);
 self.getProfiles(newProfiles);
-self.test(profiles);
 
 // distanceList = [[id, distance], ...]
 distanceList = findDistance(idOnlineList);
-
 
 // Message
 
@@ -150,3 +161,4 @@ rep(listOfMessage <- []) {
 }
 self.returnMessageToDevice(messageToReturn);
 true;
+

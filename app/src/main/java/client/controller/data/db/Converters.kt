@@ -1,7 +1,6 @@
 package client.controller.data.db
 
 import androidx.room.TypeConverter
-import java.io.*
 import java.util.*
 
 class Converters {

@@ -10,6 +10,7 @@ import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import client.view.messagelist.UserMessageListActivity
 import it.unibo.aggregatecomputingclient.R
+import java.util.*
 
 class UserListActivity : AppCompatActivity() {
 
@@ -32,10 +33,11 @@ class UserListActivity : AppCompatActivity() {
         supportActionBar!!.setDefaultDisplayHomeAsUpEnabled(true)
     }
 
-    private fun startMessageActivity(uid: Int) {
+    private fun startMessageActivity(uid: UUID) {
         val intent = Intent(this, UserMessageListActivity::class.java)
         val bundle = Bundle()
-        bundle.putInt("uid", uid)
+        bundle.putSerializable("uid", uid)
+
         intent.putExtras(bundle)
         startActivity(intent)
         finish()

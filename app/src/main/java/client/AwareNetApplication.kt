@@ -12,8 +12,4 @@ class AwareNetApplication : Application() {
         appController = AppController.getAppController(this)
     }
 
-    override fun onTerminate() {
-        super.onTerminate()
-
-    }
 }

@@ -1,25 +1,19 @@
 package client.view.messagelist
 
 import android.content.Intent
-import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
-import android.text.Editable
 import android.widget.Button
 import android.widget.EditText
-import android.widget.LinearLayout
-import androidx.core.widget.addTextChangedListener
+import androidx.appcompat.app.AppCompatActivity
 import androidx.lifecycle.Observer
 import androidx.lifecycle.ViewModelProvider
-import androidx.lifecycle.get
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import client.controller.AppController
-import client.controller.data.db.Message
 import client.view.userlist.UserListActivity
 import it.unibo.aggregatecomputingclient.R
 import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.launch
-import java.lang.Exception
 import java.util.*
 
 class UserMessageListActivity : AppCompatActivity() {
@@ -27,8 +21,7 @@ class UserMessageListActivity : AppCompatActivity() {
     lateinit var userMessageListViewModel: UserMessageListViewModel
     lateinit var editTextToSend: EditText
     lateinit var sendButton: Button
-
-    var uid = -1
+    lateinit var uid: UUID
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -39,9 +32,9 @@ class UserMessageListActivity : AppCompatActivity() {
 
         val extra = intent.extras
         if (extra != null)
-            uid = extra.getInt("uid")
+            uid = extra.getSerializable("uid") as UUID
         else
-            throw Exception("uid is -1!")
+            throw Exception("can't get the uid")
 
         val recyclerView: RecyclerView = findViewById(R.id.recyclerviewUserChat)
         val userMessageAdapter = UserMessageListAdapter(this)

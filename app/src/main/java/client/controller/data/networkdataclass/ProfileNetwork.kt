@@ -1,9 +1,11 @@
 package client.controller.data.networkdataclass
 
 import java.io.Serializable
+import java.util.*
 
 class ProfileNetwork(
-    val userID: Int,
+    val userUUID: UUID,
+
     val username: String,
     val interest: String,
     val image: Serializable?
@@ -14,18 +16,18 @@ class ProfileNetwork(
      * if it's greater than [other].
      */
     override fun compareTo(other: ProfileNetwork): Int {
-        return userID.compareTo(other.userID)
+        return userUUID.compareTo(other.userUUID)
     }
 
     override fun equals(other: Any?): Boolean {
-        val otherProfile = other as? ProfileNetwork
-        return if (otherProfile != null)
-            this.userID == otherProfile.userID
-        else
-            super.equals(other)
+        return when (other){
+            is ProfileNetwork -> userUUID == other.userUUID
+            else -> super.equals(other)
+        }
     }
 
     override fun hashCode(): Int {
-        return userID
+        return userUUID.hashCode()
     }
+
 }

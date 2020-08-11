@@ -4,7 +4,7 @@ import java.io.Serializable
 import java.util.*
 
 class MessageNetwork(
-    val uid: UUID, val sender: Int, val destination: Int, val date: Date,
+    val uid: UUID, val sender: UUID, val destination: UUID, val date: Date,
     val content: Serializable
 ) : Serializable {
 
